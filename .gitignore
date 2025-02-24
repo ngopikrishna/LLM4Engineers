@@ -1,0 +1,8 @@
+/.cache
+.DS_Store
+LLM4Engg.code-workspace
+VectorDb/faiss_index.db
+VectorDb/faiss_index.db.metadata
+Source Material/aympd_router_dataset_v2.csv
+Source Material/ays_questions_dataset.csv
+Gitam.code-workspace
