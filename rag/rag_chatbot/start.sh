@@ -1,0 +1,1 @@
+python app.py --index "../../Source Material/TCS - annual-report-2023-2024.faiss"

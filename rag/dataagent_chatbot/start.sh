@@ -1,0 +1,1 @@
+python app.py --data "../../Source Material/data/NSE Data YTD.xlsx"

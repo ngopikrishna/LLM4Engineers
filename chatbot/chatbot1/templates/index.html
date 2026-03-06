@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot1</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --accent:       #5865f2;
+            --accent-hover: #4752c4;
+            --bg:           #f3f4f6;
+            --surface:      #ffffff;
+            --border:       #e5e7eb;
+            --text:         #111827;
+            --muted:        #6b7280;
+            --error:        #ef4444;
+            --success:      #22c55e;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ── Header ───────────────────────────────────────────── */
+        header {
+            background: var(--accent);
+            color: #fff;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+        header h1  { font-size: 1.1rem; font-weight: 700; }
+        header span { font-size: 0.8rem; opacity: 0.85; }
+
+        /* ── Layout ───────────────────────────────────────────── */
+        .layout {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* ── Sidebar ──────────────────────────────────────────── */
+        .sidebar {
+            width: 290px;
+            min-width: 290px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-block {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-block h3 {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--muted);
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: var(--muted);
+            margin-top: 10px;
+            margin-bottom: 3px;
+        }
+        label:first-of-type { margin-top: 0; }
+
+        label .optional {
+            font-weight: 400;
+            font-style: italic;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 7px 9px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-family: inherit;
+            color: var(--text);
+            background: #fff;
+            transition: border-color 0.15s;
+        }
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(88,101,242,.15);
+        }
+        textarea { resize: vertical; }
+
+        .param-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .param-grid > div { display: flex; flex-direction: column; }
+        .param-grid label { margin-top: 0; }
+
+        /* ── Main chat area ───────────────────────────────────── */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .status-bar {
+            padding: 5px 16px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            font-size: 0.75rem;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            flex-shrink: 0;
+        }
+        .status-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: var(--success);
+            flex-shrink: 0;
+        }
+        .status-dot.loading {
+            background: var(--accent);
+            animation: pulse 1s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+        .response-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: var(--bg);
+        }
+
+        .response-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px 18px;
+            min-height: 160px;
+            white-space: pre-wrap;
+            font-size: 0.9rem;
+            line-height: 1.65;
+            color: var(--text);
+            word-break: break-word;
+        }
+        .response-box.is-placeholder { color: var(--muted); font-style: italic; }
+        .response-box.is-error       { color: var(--error); border-color: #fecaca; }
+
+        /* ── Input row ────────────────────────────────────────── */
+        .input-section {
+            padding: 12px 16px;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .input-row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+        .input-row textarea {
+            flex: 1;
+            min-height: 60px;
+            max-height: 140px;
+            resize: none;
+        }
+        .send-btn {
+            padding: 9px 22px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            height: fit-content;
+            transition: background 0.15s;
+        }
+        .send-btn:hover:not(:disabled) { background: var(--accent-hover); }
+        .send-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+        .hint {
+            font-size: 0.72rem;
+            color: var(--muted);
+            margin-top: 6px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Chatbot1</h1>
+    <span>Powered by {{ cfg.MODEL }} &nbsp;·&nbsp; Q&amp;A mode (no history)</span>
+</header>
+
+<div class="layout">
+
+    <!-- ── Sidebar ────────────────────────────────────────────── -->
+    <aside class="sidebar">
+
+        <div class="sidebar-block">
+            <h3>System Prompt</h3>
+            <textarea id="system_prompt" rows="6"
+                placeholder="Instructions for Claude...">{{ cfg.SYSTEM_PROMPT }}</textarea>
+        </div>
+
+        <div class="sidebar-block">
+            <h3>Model</h3>
+            <label for="model">Model ID</label>
+            <input type="text" id="model" value="{{ cfg.MODEL }}"
+                   placeholder="e.g. claude-sonnet-4-6">
+        </div>
+
+        <div class="sidebar-block">
+            <h3>Parameters</h3>
+
+            <div class="param-grid">
+                <div>
+                    <label for="max_tokens">Max Tokens</label>
+                    <input type="number" id="max_tokens"
+                           value="{{ cfg.MAX_TOKENS }}" min="1" max="64000">
+                </div>
+                <div>
+                    <label for="temperature">Temperature</label>
+                    <input type="number" id="temperature"
+                           value="{{ cfg.TEMPERATURE }}" min="0" max="1" step="0.01">
+                </div>
+                <div>
+                    <label for="top_p">Top P <span class="optional">(opt)</span></label>
+                    <input type="number" id="top_p"
+                           placeholder="default" min="0" max="1" step="0.01">
+                </div>
+                <div>
+                    <label for="top_k">Top K <span class="optional">(opt)</span></label>
+                    <input type="number" id="top_k"
+                           placeholder="default" min="1" step="1">
+                </div>
+            </div>
+        </div>
+
+    </aside>
+
+    <!-- ── Chat area ──────────────────────────────────────────── -->
+    <div class="chat-area">
+
+        <div class="status-bar">
+            <div class="status-dot" id="status_dot"></div>
+            <span id="status_text">Ready</span>
+        </div>
+
+        <div class="response-area">
+            <div class="response-box is-placeholder" id="response_box">
+                Response will appear here…
+            </div>
+        </div>
+
+        <div class="input-section">
+            <div class="input-row">
+                <textarea id="user_prompt"
+                    placeholder="Type your message… (Ctrl+Enter to send)"
+                    onkeydown="handle_key_down(event)"></textarea>
+                <button class="send-btn" id="send_btn" onclick="send_message()">
+                    Send
+                </button>
+            </div>
+            <p class="hint">
+                Ctrl+Enter to send &nbsp;·&nbsp;
+                Each question is independent — no conversation history is sent
+            </p>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // ── Helpers ──────────────────────────────────────────────────
+
+    function set_status(is_loading, message) {
+        const dot  = document.getElementById('status_dot');
+        const text = document.getElementById('status_text');
+        dot.className = 'status-dot' + (is_loading ? ' loading' : '');
+        text.textContent = message;
+    }
+
+    function get_params() {
+        const raw_top_p = document.getElementById('top_p').value.trim();
+        const raw_top_k = document.getElementById('top_k').value.trim();
+        return {
+            system_prompt: document.getElementById('system_prompt').value,
+            user_prompt:   document.getElementById('user_prompt').value.trim(),
+            model:         document.getElementById('model').value.trim(),
+            max_tokens:    parseInt(document.getElementById('max_tokens').value, 10),
+            temperature:   parseFloat(document.getElementById('temperature').value),
+            top_p: raw_top_p !== '' ? parseFloat(raw_top_p) : null,
+            top_k: raw_top_k !== '' ? parseInt(raw_top_k, 10) : null,
+        };
+    }
+
+    function handle_key_down(event) {
+        if (event.ctrlKey && event.key === 'Enter') {
+            event.preventDefault();
+            send_message();
+        }
+    }
+
+    // ── Main send function ────────────────────────────────────────
+
+    async function send_message() {
+        const params = get_params();
+
+        if (!params.user_prompt) {
+            alert('Please enter a message.');
+            return;
+        }
+
+        const response_box = document.getElementById('response_box');
+        const send_btn     = document.getElementById('send_btn');
+
+        response_box.className   = 'response-box';
+        response_box.textContent = '';
+        send_btn.disabled        = true;
+        set_status(true, 'Thinking…');
+
+        try {
+            const response = await fetch('/chat', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify(params),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const reader  = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop(); // keep incomplete last line
+
+                for (const line of lines) {
+                    if (!line.startsWith('data: ')) continue;
+
+                    const raw = line.slice(6).trim();
+                    if (raw === '[DONE]') break;
+
+                    try {
+                        const parsed = JSON.parse(raw);
+                        if (parsed.text) {
+                            response_box.textContent += parsed.text;
+                            response_box.scrollTop = response_box.scrollHeight;
+                        } else if (parsed.error) {
+                            response_box.className   = 'response-box is-error';
+                            response_box.textContent = 'Error: ' + parsed.error;
+                        }
+                    } catch (_) { /* ignore malformed SSE chunks */ }
+                }
+            }
+
+            set_status(false, 'Done');
+
+        } catch (err) {
+            response_box.className   = 'response-box is-error';
+            response_box.textContent = 'Network error: ' + err.message;
+            set_status(false, 'Error');
+        } finally {
+            send_btn.disabled = false;
+        }
+    }
+
+    // Focus the prompt on load
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('user_prompt').focus();
+    });
+</script>
+
+</body>
+</html>

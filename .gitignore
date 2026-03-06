@@ -6,3 +6,11 @@ VectorDb/faiss_index.db.metadata
 Source Material/aympd_router_dataset_v2.csv
 Source Material/ays_questions_dataset.csv
 Gitam.code-workspace
+.env
+update_aws_credentials.py
+.claude/settings.local.json
+*.pyc
+CLAUDE.md
+mcp/nseserver/nseserver.code-workspace
+teachingnotes.txt
+training_log.csv

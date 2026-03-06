@@ -1,0 +1,7 @@
+argparse
+pexpect
+boto3
+llama-index
+llama-index-core
+llama-index-llms-bedrock-converse
+llama-index-tools-mcp

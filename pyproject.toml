@@ -1,0 +1,33 @@
+[project]
+name = "llm4engineers"
+version = "0.1.0"
+description = "Companion code for the book LLMs for Engineers"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    # Core ML / numerical
+    "numpy",
+    "matplotlib",
+    "seaborn",
+    # Anthropic Claude API (chatbot1/)
+    "anthropic",
+    "flask",
+    "python-dotenv",
+    # Ollama client (chatbot/)
+    "ollama",
+    # LangChain (chatbot/, rag/)
+    "langchain",
+    "langchain-community",
+    "langchain-core",
+    # RAG / vector search (rag/)
+    "faiss-cpu",
+    "sentence-transformers",
+    "PyPDF2",
+    "llama-index[llms,tools]>=0.14.15",
+    "llama-index-llms-ollama>=0.9.1",
+    "llama-index-embeddings-huggingface>=0.6.1",
+    "boto3>=1.42.62",
+    "pexpect>=4.9.0",
+    "fastmcp>=3.1.0",
+    "llama-index-tools-mcp>=0.4.8",
+]

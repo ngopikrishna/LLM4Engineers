@@ -1,0 +1,1 @@
+python rag/create_index.py "Source Material/TCS - annual-report-2023-2024.pdf"
